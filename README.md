@@ -120,8 +120,8 @@ nodepop/
 
 ### Usuario de prueba
 
-**Email**	                **Contraseña**
 ```yaml
+**Email**	            **Contraseña**
 test@nodepop.com        1234
 lucas@nodepop.com       lucas
 ```
