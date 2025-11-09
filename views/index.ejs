@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title><%= title %></title>
+  <link rel="stylesheet" href="/stylesheets/style.css" />
+</head>
+<body>
+  <h1><%= title %></h1>
+
+  <form method="get" action="/">
+    <input type="text" name="name" placeholder="Buscar producto..." />
+    <select name="tag">
+      <option value="">Todos</option>
+      <option value="work">Work</option>
+      <option value="lifestyle">Lifestyle</option>
+      <option value="motor">Motor</option>
+      <option value="mobile">Mobile</option>
+    </select>
+    <button type="submit">Filtrar</button>
+  </form>
+
+  <ul>
+    <% if (products.length === 0) { %>
+      <li>No hay productos disponibles</li>
+    <% } else { %>
+      <% products.forEach(p => { %>
+        <li>
+          <strong><%= p.name %></strong> - <%= p.price %>€
+          [<%= p.tags.join(', ') %>]
+        </li>
+      <% }) %>
+    <% } %>
+  </ul>
+
+  <form method="post" action="/">
+    <h2>Crear producto</h2>
+    <input type="text" name="name" placeholder="Nombre" required />
+    <input type="text" name="owner" placeholder="Propietario" required />
+    <input type="number" name="price" placeholder="Precio" required />
+    <input type="text" name="tags" placeholder="Tags (separados por coma)" />
+    <button type="submit">Crear</button>
+  </form>
+</body>
+</html>
