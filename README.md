@@ -24,8 +24,8 @@ cd nodepop
 
 Crea un archivo .env en la raíz del proyecto con el siguiente contenido:
 ```ini
+PORT=3000
 MONGODB_URI=mongodb://127.0.0.1:27017/nodepop
-SESSION_SECRET=un_string_seguro
 ```
 
 ### 4 Inicializar base de datos con datos de ejemplo
@@ -97,8 +97,7 @@ nodepop/
 │   ├── login.ejs              
 │   └── error.ejs                          
 ├── public/
-│   ├── stylesheets/style.css  
-│   └── images/ 
+│   └── stylesheets/style.css  
 ├── scripts/
 │   └── createUser.js          
 ├── initDB.js                  
