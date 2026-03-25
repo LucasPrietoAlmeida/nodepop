@@ -122,5 +122,5 @@ nodepop/
 ```yaml
 **Email**	            **Contraseña**
 test@nodepop.com        1234
-lucas@nodepop.com       lucas
+lucas@nodepop.com       1234
 ```
