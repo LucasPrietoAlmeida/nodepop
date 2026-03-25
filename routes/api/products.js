@@ -1,12 +1,13 @@
 const express = require('express');
 const router = express.Router();
 const Product = require('../../models/Product');
+const User = require('../../models/User');
 const requireLogin = require('../../middleware/auth');
 
 router.get('/', requireLogin, async (req, res, next) => {
     try {
         const { tag, min, max, name, skip = 0, limit = 5, sort = 'name' } = req.query;
-        const filter = { owner: req.session.email };
+        const filter = { owner: req.session.userId };
 
         if (tag) filter.tags = tag;
         if (name) filter.name = new RegExp('^' + name, 'i');
@@ -15,7 +16,9 @@ router.get('/', requireLogin, async (req, res, next) => {
         if (max) filter.price.$lte = parseFloat(max);
 
         const total = await Product.countDocuments(filter);
+
         const products = await Product.find(filter)
+        .populate('owner', 'email')
         .skip(parseInt(skip))
         .limit(parseInt(limit))
         .sort(sort);
@@ -23,16 +26,20 @@ router.get('/', requireLogin, async (req, res, next) => {
         const nextSkip = parseInt(skip) + parseInt(limit);
         const prevSkip = parseInt(skip) - parseInt(limit);
 
+        const userDoc = await User.findById(req.session.userId);
+
         res.render('index', {
-        title: 'Nodepop',
-        products,
-        total,
-        limit: parseInt(limit),
-        skip: parseInt(skip),
-        nextSkip: nextSkip < total ? nextSkip : null,
-        prevSkip: prevSkip >= 0 ? prevSkip : null,
-        query: req.query
+            title: 'Nodepop',
+            products,
+            total,
+            limit: parseInt(limit),
+            skip: parseInt(skip),
+            nextSkip: nextSkip < total ? nextSkip : null,
+            prevSkip: prevSkip >= 0 ? prevSkip : null,
+            query: req.query,
+            user: userDoc.email
         });
+
     } catch (err) {
         next(err);
     }
@@ -42,17 +49,19 @@ router.get('/', requireLogin, async (req, res, next) => {
 router.post('/', requireLogin, async (req, res, next) => {
     try {
         const { name, price, tags } = req.body;
+
         const tagsArray = tags ? tags.split(',').map(t => t.trim()) : [];
 
         const product = new Product({
-        name,
-        owner: req.session.email, 
-        price: parseFloat(price),
-        tags: tagsArray
+            name,
+            owner: req.session.userId, 
+            price: parseFloat(price),
+            tags: tagsArray
         });
 
         await product.save();
         res.redirect('/');
+
     } catch (err) {
         next(err);
     }
@@ -61,10 +70,12 @@ router.post('/', requireLogin, async (req, res, next) => {
 router.post('/delete/:id', requireLogin, async (req, res, next) => {
     try {
         await Product.deleteOne({
-        _id: req.params.id,
-        owner: req.session.email 
+            _id: req.params.id,
+            owner: req.session.userId
         });
+
         res.redirect('/');
+
     } catch (err) {
         next(err);
     }

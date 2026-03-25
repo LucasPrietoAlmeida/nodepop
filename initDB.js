@@ -1,6 +1,7 @@
 require('dotenv').config();
 const mongoose = require('mongoose');
 const Product = require('./models/Product');
+const User = require('./models/User');
 const connectMongoose = require('./lib/connectMongoose');
 
 const products = [
@@ -54,8 +55,34 @@ const products = [
 
 async function initDB() {
     await connectMongoose();
+
+    await User.deleteMany();
     await Product.deleteMany();
-    await Product.insertMany(products);
+
+    const usersData = [
+        { email: 'test@nodepop.com', password: '1234' },
+        { email: 'lucas@nodepop.com', password: '1234' }
+    ];
+
+    const users = [];
+    for (const u of usersData) {
+        const user = new User(u);
+        await user.save();
+        users.push(user);
+    }
+
+    const userMap = {};
+    users.forEach(user => {
+        userMap[user.email] = user._id;
+    });
+
+    const productsWithOwnerId = products.map(product => ({
+        ...product,
+        owner: userMap[product.owner]
+    }));
+
+    await Product.insertMany(productsWithOwnerId);
+
     console.log('Database initialized with sample data');
     mongoose.connection.close();
 }
