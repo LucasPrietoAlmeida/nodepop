@@ -1,5 +1,155 @@
 # Nodepop
 
+Despliegue en servidor (AWS / producción)
+
+1. Preparar la instancia
+
+- Instancia EC2 con Ubuntu
+- Abrir puertos en Security Group:
+    - 22 (SSH)
+    - 80 (HTTP)
+
+---
+
+2. Instalar dependencias en el servidor
+
+```bash
+sudo apt update
+sudo apt install -y nginx git nodejs npm
+```
+Instalar PM2:
+
+```bash
+sudo npm install -g pm2
+```
+
+---
+
+3. Clonar el repositorio
+
+```bash
+git clone https://github.com/tuusuario/nodepop.git
+cd nodepop
+npm install
+```
+
+---
+
+4. Configurar variables de entorno
+
+Crear .env:
+```bash
+nano .env
+```
+
+Contenido:
+```
+PORT=3000
+MONGODB_URI=mongodb://127.0.0.1:27017/nodepop
+```
+
+---
+
+5. Inicializar base de datos
+
+```bash
+npm run initDB
+```
+
+---
+
+6. Ejecutar la aplicación con PM2
+
+```bash
+pm2 start bin/www --name nodepop
+pm2 save
+pm2 startup
+```
+
+---
+
+7. Configurar Nginx como proxy inverso
+
+Archivo:
+```bash
+sudo nano /etc/nginx/sites-available/default
+```
+
+Ejemplo de configuración multi-dominio:
+```Nginx
+# React
+server {
+    listen 80;
+    server_name react.local;
+
+    root /var/www/react-app;
+    index index.html;
+
+    location / {
+        try_files $uri /index.html;
+    }
+}
+
+# Nodepop
+server {
+    listen 80;
+    server_name nodepop.local;
+
+    location / {
+        proxy_pass http://127.0.0.1:3000;
+        proxy_http_version 1.1;
+
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+    }
+}
+
+# Static files
+server {
+    listen 80;
+    server_name static.local;
+
+    location / {
+        root /var/www/html;
+        autoindex on;
+
+        add_header X-Owner LucasPrietoAlmeida;
+    }
+}
+```
+
+Aplicar cambios:
+
+```bash
+sudo nginx -t
+sudo systemctl restart nginx
+```
+
+---
+
+8. Configurar dominios locales (cliente)
+
+En tu máquina local editar /etc/hosts o hosts en Windows:
+
+```bash
+44.206.105.77 react.local
+44.206.105.77 nodepop.local
+44.206.105.77 static.local
+```
+
+---
+
+Acceso a la aplicación
+
+Una vez configurado:
+
+- http://react.local → Frontend React
+- http://nodepop.local → Nodepop (Express + EJS)
+- http://static.local → Archivos estáticos
+
+
+---
+
 **Nodepop** es una aplicación web desarrollada con **Node.js, Express, EJS y MongoDB (Mongoose)** como parte del módulo de Backend del Bootcamp de KeepCoding.
 
 Permite la gestión de productos de un marketplace interno, con autenticación de usuarios, filtros, creación y eliminación de productos, y renderizado del contenido en servidor (SSR).
