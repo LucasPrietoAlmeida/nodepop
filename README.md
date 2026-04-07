@@ -2,6 +2,8 @@
 
 Despliegue en servidor (AWS / producción)
 
+IP del Servidor online -> 44.206.105.77
+
 1. Preparar la instancia
 
 - Instancia EC2 con Ubuntu
