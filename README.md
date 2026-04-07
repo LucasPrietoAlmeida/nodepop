@@ -1,8 +1,8 @@
 # Nodepop
 
-Despliegue en servidor (AWS / producción)
-
 IP del Servidor online -> 44.206.105.77
+
+Despliegue en servidor (AWS / producción)
 
 1. Preparar la instancia
 
